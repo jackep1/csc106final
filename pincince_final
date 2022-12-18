@@ -99,27 +99,40 @@ var drawBitmoji = function(height, bitmojiX, bitmojiY) {
     drawBitmojiBody(height, bitmojiX, bitmojiY);
 };
 
+// Set scene variable and determine number of rows and columns
+var scene = 1;
+var NUM_COLS = 8;
+var NUM_ROWS = 7;
+
 /***** Tiles section *****/
 
 // Defines tile object prototype
-var Tile = function(x, y, face) {
+var Tile = function(x, y, id, face) {
     this.x = x;
     this.y = y;
     this.size = 50;
     this.face = face;
     this.isFaceUp = false;
-    this.isMatch = false;
+    this.ID = id;
+    this.topLeftTile = this.ID - (NUM_COLS + 1);
+    this.topMidTile = this.ID - NUM_COLS;
+    this.topRightTile = this.ID - (NUM_COLS - 1);
+    this.leftMidTile = this.ID - 1;
+    this.rightMidTile = this.ID + 1;
+    this.bottomLeftTile = this.ID + (NUM_COLS - 1);
+    this.bottomMidTile = this.ID + NUM_COLS;
+    this.bottomRightTile = this.ID + (NUM_COLS + 1);
 };
 
 // Defines tile draw function
 Tile.prototype.draw = function() {
-    fill(214, 247, 202);
+    fill(174, 184, 171);
     strokeWeight(2);
     rect(this.x, this.y, this.size, this.size, 10);
     if (this.isFaceUp) {
         image(this.face, this.x, this.y, this.size, this.size);
     } else {
-        image(getImage("avatars/leaf-green"), this.x, this.y, this.size, this.size);
+        image(getImage("cute/Rock"), this.x, this.y, this.size, this.size);
     }
 };
 
@@ -128,6 +141,7 @@ Tile.prototype.isUnderMouse = function(x, y) {
     return x >= this.x && x <= this.x + this.size  &&
         y >= this.y && y <= this.y + this.size;
 };
+
 
 /***** Button section *****/
 
@@ -167,29 +181,26 @@ var startButton = new Button({
 
 /***** Global configuration section *****/
 
-// Set scene variable and determine number of rows and columns
-var scene = 0;
-var NUM_COLS = 6;
-var NUM_ROWS = 4;
-
-// Declare an array of all possible faces
+// Declare an array of all possible results
 var faces = [
-    getImage("avatars/mr-pants-green"),
-    getImage("avatars/mr-pants-orange"),
-    getImage("avatars/mr-pants-pink"),
-    getImage("avatars/primosaur-seedling"),
-    getImage("avatars/primosaur-tree"),
-    getImage("avatars/primosaur-ultimate"),
-    getImage("avatars/spunky-sam"),
-    getImage("avatars/spunky-sam-green"),
-    getImage("avatars/spunky-sam-orange"),
-    getImage("avatars/spunky-sam-red")
+    getImage("avatars/mr-pink"),
+    getImage("space/1"),
+    getImage("space/2"),
+    getImage("space/3"),
+    getImage("space/4"),
+    getImage("space/5"),
+    getImage("space/6"),
+    getImage("space/7"),
+    getImage("space/8")
 ];
+
+//Make array of bombs
+var bombFaces = [faces[0], faces[0], faces[0]];
 
 // Make an array which has 3 of each, then randomize it
 var possibleFaces = faces.slice(0);
 var selected = [];
-for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 3; i++) {
+/*for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 3; i++) {
     // Randomly pick one from the array of remaining faces
     var randomInd = floor(random(possibleFaces.length));
     var face = possibleFaces[randomInd];
@@ -199,7 +210,7 @@ for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 3; i++) {
     selected.push(face);
     // Remove from array
     possibleFaces.splice(randomInd, 1);
-}
+}*/
 
 // Now shuffle the elements of that array
 var shuffleArray = function(array) {
@@ -225,11 +236,16 @@ shuffleArray(selected);
 var tiles = [];
 for (var i = 0; i < NUM_COLS; i++) {
     for (var j = 0; j < NUM_ROWS; j++) {
-        var tileX = i * 54 + 40;
-        var tileY = j * 54 + 90;
-        var tileFace = selected.pop();
-        tiles.push(new Tile(tileX, tileY, tileFace));
+        var tileX = i * 50;
+        var tileY = j * 50 + 50;
+        var tileId = (i+1) + (j*8);
+        tiles.push(new Tile(tileX, tileY, tileId));
     }
+}
+
+//Assigns three bombs to random mines
+for (var i = 0; i < bombFaces.length; i++) {
+    tiles[floor(random(0, tiles.length))].face = bombFaces[i];
 }
 
 // Declares a number of descriptive variables to be manipulated later
@@ -247,22 +263,8 @@ mouseClicked = function() {
         for (var i = 0; i < tiles.length; i++) {
             var tile = tiles[i];
             if (tile.isUnderMouse(mouseX, mouseY)) {
-                if (flippedTiles.length < 3 && !tile.isFaceUp) {
-                    tile.isFaceUp = true;
-                    flippedTiles.push(tile);
-                    if (flippedTiles.length === 3) {
-                        numTries++;
-                        if (flippedTiles[0].face === flippedTiles[1].face &&
-                            flippedTiles[1].face === flippedTiles[2].face) {
-                                flippedTiles[0].isMatch = true;
-                                flippedTiles[1].isMatch = true;
-                                flippedTiles[2].isMatch = true;
-                                flippedTiles.length = 0;
-                                numMatches++;
-                        }
-                        delayStartFC = frameCount;
-                    }
-                } 
+                //Code for flipping tiles
+                
                 loop();
             }
         }
@@ -273,7 +275,7 @@ mouseClicked = function() {
 var drawTimer = function () {
     if (numMatches < tiles.length / 3) {
         frameRate(60);
-        text("Timer: " + floor(frameCount/60) + " seconds", 20, 65);
+        text("Timer: " + floor(frameCount/60) + " seconds", 215, 35);
     } else if (numMatches === tiles.length / 3) {
         frameRate(0);
         text("Timer: " + floor(frameCount/60) + " seconds", 20, 65);
@@ -303,7 +305,7 @@ var drawGameScene = function() {
     background(255, 255, 255);
     textSize(20);
     fill(0, 0, 0);
-    text("Previous attempts: " + numTries, 20, 35);
+    text("Previous attempts: " + numTries, 15, 35);
     drawTimer();
     rectMode(CORNER);
     if (delayStartFC && (frameCount - delayStartFC) > 30) {
