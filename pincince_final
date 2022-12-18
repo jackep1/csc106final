@@ -1,1 +1,341 @@
+/***** Bitmoji section *****/
 
+var drawBitmojiHead = function(height, bitmojiX, bitmojiY) {
+    noStroke();
+    
+    //hood
+    fill(71, 71, 71);
+    ellipse(bitmojiX+height*0.01, bitmojiY+height*0.78, height*1.03, height*0.46);
+    
+    //neck
+    fill(245, 221, 196);
+    quad(bitmojiX+height*0.2, bitmojiY+height*0.6, bitmojiX-height*0.2, bitmojiY+height*0.6, bitmojiX-height*0.21, bitmojiY+height*0.72, bitmojiX+height*0.21, bitmojiY+height*0.7);
+    
+    //dome
+    fill(255, 224, 189);
+    arc(bitmojiX, bitmojiY-height*0.13, height*1.02, height*0.93, 180, 360);
+    
+    //cheeks
+    quad(bitmojiX-height*0.51, bitmojiY-height*0.13, bitmojiX+height*0.51, bitmojiY-height*0.13, bitmojiX+height*0.44, bitmojiY+height*0.38, bitmojiX-height*0.45, bitmojiY+height*0.38);
+    
+    //jaw
+    quad(bitmojiX+height*0.44, bitmojiY+height*0.37, bitmojiX-height*0.45, bitmojiY+height*0.38, bitmojiX-height*0.29, bitmojiY+height*0.59, bitmojiX+height*0.28, bitmojiY+height*0.59);
+    
+    //chin
+    arc(bitmojiX, bitmojiY+height*0.55, height*0.57, height*0.25, 0, 180);
+    
+    //ears (left - right)
+    ellipse(bitmojiX-height*0.46, bitmojiY+height*0.09, height*0.2, height*0.29);
+    ellipse(bitmojiX+height*0.46, bitmojiY+height*0.09, height*0.2, height*0.29);
+    
+    //hat
+    fill(78, 102, 117);
+    arc(bitmojiX, bitmojiY-height*0.28, height*0.98, height*0.62, 180, 360);
+    
+    //hair
+    fill(64, 56, 47);
+    arc(bitmojiX, bitmojiY-height*0.28, height*0.42, height*0.25, 180, 360);
+    triangle(bitmojiX+height*0.37, bitmojiY-height*0.28, bitmojiX+height*0.50, bitmojiY-height*0.1, bitmojiX+height*0.49, bitmojiY-height*0.28);
+    triangle(bitmojiX-height*0.49, bitmojiY-height*0.28, bitmojiX-height*0.49, bitmojiY-height*0.1, bitmojiX-height*0.37, bitmojiY-height*0.28);
+    
+    //eyes (left - right)
+    fill(255, 255, 255); //whites
+    ellipse(bitmojiX-height*0.22, bitmojiY-height*0.03, height*0.15, height*0.08);
+    ellipse(bitmojiX+height*0.22, bitmojiY-height*0.03, height*0.15, height*0.08);
+    fill(70, 97, 140); //colors
+    ellipse(bitmojiX-height*0.22, bitmojiY-height*0.03, height*0.08, height*0.08);
+    ellipse(bitmojiX+height*0.22, bitmojiY-height*0.03, height*0.08, height*0.08);
+    fill(0, 0, 0); //pupils
+    ellipse(bitmojiX-height*0.22, bitmojiY-height*0.03, height*0.04, height*0.04);
+    ellipse(bitmojiX+height*0.22, bitmojiY-height*0.03, height*0.04, height*0.04);
+    
+    //eyebrows (left-right)
+    noFill();
+    stroke(64, 56, 47);
+    strokeWeight(height*0.02);
+    arc(bitmojiX-height*0.22, bitmojiY-height*0.09, height*0.26, height*0.06, 225, 315);
+    arc(bitmojiX+height*0.22, bitmojiY-height*0.09, height*0.26, height*0.06, 225, 315);
+    
+    //nose
+    line(bitmojiX+height*0.06, bitmojiY+height*0.2, bitmojiX-height*0.02, bitmojiY+height*0.05);
+    noFill();
+    arc(bitmojiX+height*0.03, bitmojiY+height*0.2, height*0.06, height*0.03, -5, 120);
+    
+    //mouth
+    fill(255, 255, 255);
+    strokeWeight(height*0.005);
+    arc(bitmojiX, bitmojiY+height*0.41, height*0.37, height*0.19, -5, 185);
+};
+
+var drawBitmojiBody = function(height, bitmojiX, bitmojiY) {
+    //shirt
+    fill(71, 71, 71);
+    noStroke();
+    rectMode(CENTER);
+    rect(bitmojiX, bitmojiY+height*1.03, height*1.44, height*0.62, height*0.1);
+    
+    //logo
+    noFill();
+    strokeWeight(height*0.03);
+    stroke(255, 255, 255);
+    arc(bitmojiX+height*0.32, bitmojiY+height*0.96, height*0.06, height*0.03, 70, 240);
+    strokeWeight(height*0.034);
+    line(bitmojiX+height*0.35, bitmojiY+height*0.96, bitmojiX+height*0.43, bitmojiY+height*0.92);
+    
+    //strings
+    strokeWeight(height*0.02);
+    stroke(255, 255, 255);
+    line(bitmojiX-height*0.13, bitmojiY+height*0.76, bitmojiX-height*0.14, bitmojiY+height*1.02);
+    line(bitmojiX+height*0.13, bitmojiY+height*0.76, bitmojiX+height*0.15, bitmojiY+height*1.08);
+    
+    //lettering
+    fill(78, 102, 117);
+    textSize(height*0.33);
+    text('JP', bitmojiX-height*0.0, bitmojiY+height*1.18);
+};
+
+var drawBitmoji = function(height, bitmojiX, bitmojiY) {
+    drawBitmojiHead(height, bitmojiX, bitmojiY);
+    drawBitmojiBody(height, bitmojiX, bitmojiY);
+};
+
+/***** Tiles section *****/
+
+// Defines tile object prototype
+var Tile = function(x, y, face) {
+    this.x = x;
+    this.y = y;
+    this.size = 50;
+    this.face = face;
+    this.isFaceUp = false;
+    this.isMatch = false;
+};
+
+// Defines tile draw function
+Tile.prototype.draw = function() {
+    fill(214, 247, 202);
+    strokeWeight(2);
+    rect(this.x, this.y, this.size, this.size, 10);
+    if (this.isFaceUp) {
+        image(this.face, this.x, this.y, this.size, this.size);
+    } else {
+        image(getImage("avatars/leaf-green"), this.x, this.y, this.size, this.size);
+    }
+};
+
+// Determines if mouse is in the tile
+Tile.prototype.isUnderMouse = function(x, y) {
+    return x >= this.x && x <= this.x + this.size  &&
+        y >= this.y && y <= this.y + this.size;
+};
+
+/***** Button section *****/
+
+// Creates a more general button class
+var Button = function(config) {
+    this.x = config.x || 130;
+    this.y = config.y || 150;
+    this.height = config.height || 60;
+    this.width = config.width || 140;
+    this.color = config.color;
+    this.label = config.label;
+};
+
+// Defines button draw function
+Button.prototype.draw = function() {
+    fill(this.color);
+    rect(this.x, this.y, this.width, this.height);
+    fill(0, 0, 0);
+    textAlign(CENTER, CENTER);
+    textSize(35);
+    text(this.label, this.x + this.width/2, this.y + this.height/2);
+};
+
+// Determines if mouse is in button
+Button.prototype.isMouseIn = function() {
+    return mouseX > this.x &&
+           mouseX < (this.x + this.width) &&
+           mouseY > this.y &&
+           mouseY < (this.y + this.height);
+};
+
+// Creates a start button
+var startButton = new Button({
+    color: color(67, 105, 75),
+    label: "START"
+});
+
+/***** Global configuration section *****/
+
+// Set scene variable and determine number of rows and columns
+var scene = 0;
+var NUM_COLS = 6;
+var NUM_ROWS = 4;
+
+// Declare an array of all possible faces
+var faces = [
+    getImage("avatars/mr-pants-green"),
+    getImage("avatars/mr-pants-orange"),
+    getImage("avatars/mr-pants-pink"),
+    getImage("avatars/primosaur-seedling"),
+    getImage("avatars/primosaur-tree"),
+    getImage("avatars/primosaur-ultimate"),
+    getImage("avatars/spunky-sam"),
+    getImage("avatars/spunky-sam-green"),
+    getImage("avatars/spunky-sam-orange"),
+    getImage("avatars/spunky-sam-red")
+];
+
+// Make an array which has 3 of each, then randomize it
+var possibleFaces = faces.slice(0);
+var selected = [];
+for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 3; i++) {
+    // Randomly pick one from the array of remaining faces
+    var randomInd = floor(random(possibleFaces.length));
+    var face = possibleFaces[randomInd];
+    // Push three times onto array
+    selected.push(face);
+    selected.push(face);
+    selected.push(face);
+    // Remove from array
+    possibleFaces.splice(randomInd, 1);
+}
+
+// Now shuffle the elements of that array
+var shuffleArray = function(array) {
+    var counter = array.length;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        var ind = Math.floor(Math.random() * counter);
+        // Decrease counter by 1
+        counter--;
+        // And swap the last element with it
+        var temp = array[counter];
+        array[counter] = array[ind];
+        array[ind] = temp;
+    }
+};
+
+// Perform shuffleArray on our array of images
+shuffleArray(selected);
+
+// Create the tiles
+var tiles = [];
+for (var i = 0; i < NUM_COLS; i++) {
+    for (var j = 0; j < NUM_ROWS; j++) {
+        var tileX = i * 54 + 40;
+        var tileY = j * 54 + 90;
+        var tileFace = selected.pop();
+        tiles.push(new Tile(tileX, tileY, tileFace));
+    }
+}
+
+// Declares a number of descriptive variables to be manipulated later
+var numTries = 0;
+var numMatches = 0;
+var flippedTiles = [];
+var delayStartFC = null;
+
+// General mouseClicked function that changes from home screen to game screen and then     handles clicks on tiles
+mouseClicked = function() {
+    if (startButton.isMouseIn() && scene === 0) {
+        frameCount = 0;
+        scene = 1;
+    } else if (scene === 1) {
+        for (var i = 0; i < tiles.length; i++) {
+            var tile = tiles[i];
+            if (tile.isUnderMouse(mouseX, mouseY)) {
+                if (flippedTiles.length < 3 && !tile.isFaceUp) {
+                    tile.isFaceUp = true;
+                    flippedTiles.push(tile);
+                    if (flippedTiles.length === 3) {
+                        numTries++;
+                        if (flippedTiles[0].face === flippedTiles[1].face &&
+                            flippedTiles[1].face === flippedTiles[2].face) {
+                                flippedTiles[0].isMatch = true;
+                                flippedTiles[1].isMatch = true;
+                                flippedTiles[2].isMatch = true;
+                                flippedTiles.length = 0;
+                                numMatches++;
+                        }
+                        delayStartFC = frameCount;
+                    }
+                } 
+                loop();
+            }
+        }
+    }
+};
+
+// Function for drawing the timer
+var drawTimer = function () {
+    if (numMatches < tiles.length / 3) {
+        frameRate(60);
+        text("Timer: " + floor(frameCount/60) + " seconds", 20, 65);
+    } else if (numMatches === tiles.length / 3) {
+        frameRate(0);
+        text("Timer: " + floor(frameCount/60) + " seconds", 20, 65);
+    }
+};
+
+/***** Setting the scene *****/
+
+// Draws the opening splash screen
+var drawStartScene = function() {
+    background(255, 255, 255);
+    textSize(50);
+    fill(0, 0, 0);
+    textAlign(CENTER, CENTER);
+    text("Memory Game", 200, 100);
+    rectMode(CORNER);
+    startButton.draw();
+    drawBitmoji(75, 200, 263);
+    textSize(15);
+    fill(0, 0, 0);
+    text("Jonathan Pincince", 200, 380);
+};
+
+// Draws the scene with tiles
+var drawGameScene = function() {
+    textAlign(LEFT, BOTTOM);
+    background(255, 255, 255);
+    textSize(20);
+    fill(0, 0, 0);
+    text("Previous attempts: " + numTries, 20, 35);
+    drawTimer();
+    rectMode(CORNER);
+    if (delayStartFC && (frameCount - delayStartFC) > 30) {
+        for (var i = 0; i < tiles.length; i++) {
+            var tile = tiles[i];
+            if (!tile.isMatch) {
+                tile.isFaceUp = false;
+            }
+        }
+        flippedTiles = [];
+        delayStartFC = null;
+        noLoop();
+    }
+    
+    for (var i = 0; i < tiles.length; i++) {
+        tiles[i].draw();
+    }
+    
+    if (numMatches === tiles.length/3) {
+        fill(0, 0, 0);
+        textSize(20);
+        text("You found them all in " + numTries + " tries!", 20, 375);
+    }
+};
+
+// Draw function where previous scene drawing functions are called based on scene         variable
+draw = function() {
+    if (scene === 0) {
+        drawStartScene();
+    } else if (scene === 1) {
+        drawGameScene();
+    }
+};
+
+noLoop();
