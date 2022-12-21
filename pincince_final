@@ -359,6 +359,7 @@ var drawGameScene = function() {
     textSize(20);
     fill(0, 0, 0);
     text("Areas cleared: " + numTries, 15, 35);
+    drawBitmoji(20, 373, 18);
     rectMode(CORNER);
     strokeWeight(2);
     
@@ -369,6 +370,7 @@ var drawGameScene = function() {
 
 //Adds splash screen for when mine is hit
 var drawLossScene = function() {
+    textSize(20);
     fill(255, 0, 0);
     rect(0, 0, 400, 50);
     fill(255, 255, 0);
