@@ -100,32 +100,28 @@ var drawBitmoji = function(height, bitmojiX, bitmojiY) {
 };
 
 // Set scene variable and determine number of rows and columns
-var scene = 1;
+var scene = 0;
 var NUM_COLS = 8;
 var NUM_ROWS = 7;
 
-/***** Tiles section *****/
+//Set game difficulty
+var numBombs = 3;
 
-// Defines tile object prototype
-var Tile = function(x, y, id, face) {
+/***** Rocks section *****/
+
+// Defines rock object prototype
+var Rock = function(x, y, id) {
     this.x = x;
     this.y = y;
     this.size = 50;
-    this.face = face;
+    this.face = getImage("space/0");
     this.isFaceUp = false;
-    this.ID = id;
-    this.topLeftTile = this.ID - (NUM_COLS + 1);
-    this.topMidTile = this.ID - NUM_COLS;
-    this.topRightTile = this.ID - (NUM_COLS - 1);
-    this.leftMidTile = this.ID - 1;
-    this.rightMidTile = this.ID + 1;
-    this.bottomLeftTile = this.ID + (NUM_COLS - 1);
-    this.bottomMidTile = this.ID + NUM_COLS;
-    this.bottomRightTile = this.ID + (NUM_COLS + 1);
+    this.id = id;
+    this.minesAround = 0;
 };
 
-// Defines tile draw function
-Tile.prototype.draw = function() {
+// Defines rock draw function
+Rock.prototype.draw = function() {
     fill(174, 184, 171);
     strokeWeight(2);
     rect(this.x, this.y, this.size, this.size, 10);
@@ -136,10 +132,14 @@ Tile.prototype.draw = function() {
     }
 };
 
-// Determines if mouse is in the tile
-Tile.prototype.isUnderMouse = function(x, y) {
+// Determines if mouse is in the rock
+Rock.prototype.isUnderMouse = function(x, y) {
     return x >= this.x && x <= this.x + this.size  &&
         y >= this.y && y <= this.y + this.size;
+};
+
+Rock.prototype.raiseMineCount = function() {
+    this.minesAround += 1;
 };
 
 
@@ -147,7 +147,7 @@ Tile.prototype.isUnderMouse = function(x, y) {
 
 // Creates a more general button class
 var Button = function(config) {
-    this.x = config.x || 130;
+    this.x = config.x || 45;
     this.y = config.y || 150;
     this.height = config.height || 60;
     this.width = config.width || 140;
@@ -161,7 +161,7 @@ Button.prototype.draw = function() {
     rect(this.x, this.y, this.width, this.height);
     fill(0, 0, 0);
     textAlign(CENTER, CENTER);
-    textSize(35);
+    textSize(25);
     text(this.label, this.x + this.width/2, this.y + this.height/2);
 };
 
@@ -179,11 +179,41 @@ var startButton = new Button({
     label: "START"
 });
 
+// Creates a difficulty button
+var difficultyButton = new Button({
+    color: color(255, 0, 0),
+    label: "LEVEL: " + numBombs,
+    x: 215
+});
+
+// Creates a button to toggle difficulty up
+var difficultyUp = new Button({
+    color: color(140, 140, 140),
+    label: "+",
+    x: 205,
+    y: 200,
+    height: 20,
+    width: 20
+});
+
+// Creates a button to toggle difficulty down
+var difficultyDown = new Button({
+    color: color(140, 140, 140),
+    label: "-",
+    x: 345,
+    y: 200,
+    height: 20,
+    width: 20
+});
+
 /***** Global configuration section *****/
 
-// Declare an array of all possible results
-var faces = [
-    getImage("avatars/mr-pink"),
+//Assign the bomb to a variable
+var mrPinkImg = getImage("avatars/mr-pink");
+
+// Declare an array of all results when rocks are dug
+var possibleFaces = [
+    getImage("space/0"),
     getImage("space/1"),
     getImage("space/2"),
     getImage("space/3"),
@@ -191,143 +221,210 @@ var faces = [
     getImage("space/5"),
     getImage("space/6"),
     getImage("space/7"),
-    getImage("space/8")
+    getImage("space/8"),
+    mrPinkImg
 ];
 
-//Make array of bombs
-var bombFaces = [faces[0], faces[0], faces[0]];
+// Create the tiles
+var rocks = [];
+for (var i = 0; i < NUM_ROWS; i++) {
+    for (var j = 0; j < NUM_COLS; j++) {
+        var rockX = j * 50;
+        var rockY = i * 50 + 50;
+        var rockId = (j+1) + (i*8);
+        rocks.push(new Rock(rockX, rockY, rockId));
+    }
+}
 
-// Make an array which has 3 of each, then randomize it
-var possibleFaces = faces.slice(0);
-var selected = [];
-/*for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 3; i++) {
-    // Randomly pick one from the array of remaining faces
-    var randomInd = floor(random(possibleFaces.length));
-    var face = possibleFaces[randomInd];
-    // Push three times onto array
-    selected.push(face);
-    selected.push(face);
-    selected.push(face);
-    // Remove from array
-    possibleFaces.splice(randomInd, 1);
-}*/
+// Assigns bombs to random rocks
+for (var i = 0; i < numBombs; i++) {
+    var randomIndex = floor(random(0, rocks.length));
+    var bombRock = rocks[randomIndex];
+    bombRock.face = mrPinkImg;
+}
 
-// Now shuffle the elements of that array
-var shuffleArray = function(array) {
-    var counter = array.length;
-
-    // While there are elements in the array
-    while (counter > 0) {
-        // Pick a random index
-        var ind = Math.floor(Math.random() * counter);
-        // Decrease counter by 1
-        counter--;
-        // And swap the last element with it
-        var temp = array[counter];
-        array[counter] = array[ind];
-        array[ind] = temp;
+// Function to check if a rock's face is the BOMB
+var faceIsBomb = function(nearbyRock) {
+    if (nearbyRock.face === mrPinkImg) {
+        return true;
+    } else {
+        return false;
     }
 };
 
-// Perform shuffleArray on our array of images
-shuffleArray(selected);
-
-// Create the tiles
-var tiles = [];
-for (var i = 0; i < NUM_COLS; i++) {
-    for (var j = 0; j < NUM_ROWS; j++) {
-        var tileX = i * 50;
-        var tileY = j * 50 + 50;
-        var tileId = (i+1) + (j*8);
-        tiles.push(new Tile(tileX, tileY, tileId));
+// Eight functions which check if a rock's area has mines, adds to minesAround if so
+var checkUpperLeft = function(rock) {
+    if (rock.id % 8 !== 1 && rock.id - 9 > 0) {
+        var upperLeftRock = rocks[rock.id - 10];
+        if (faceIsBomb(upperLeftRock)) {
+            rock.raiseMineCount();
+        }
     }
-}
-
-//Assigns three bombs to random mines
-for (var i = 0; i < bombFaces.length; i++) {
-    tiles[floor(random(0, tiles.length))].face = bombFaces[i];
-}
-
-// Declares a number of descriptive variables to be manipulated later
-var numTries = 0;
-var numMatches = 0;
-var flippedTiles = [];
-var delayStartFC = null;
-
-// General mouseClicked function that changes from home screen to game screen and then     handles clicks on tiles
-mouseClicked = function() {
-    if (startButton.isMouseIn() && scene === 0) {
-        frameCount = 0;
-        scene = 1;
-    } else if (scene === 1) {
-        for (var i = 0; i < tiles.length; i++) {
-            var tile = tiles[i];
-            if (tile.isUnderMouse(mouseX, mouseY)) {
-                //Code for flipping tiles
-                
-                loop();
-            }
+};
+var checkUpperMid = function(rock) {
+    if (rock.id - 8 > 0) {
+        var upperMidRock = rocks[rock.id - 9];
+        if (faceIsBomb(upperMidRock)) {
+            rock.raiseMineCount();
+        }
+    }
+};
+var checkUpperRight = function(rock) {
+    if (rock.id % 8 !== 0 && rock.id - 7 > 0) {
+        var upperRightRock = rocks[rock.id - 8];
+        if (faceIsBomb(upperRightRock)) {
+            rock.raiseMineCount();
+        }
+    }
+};
+var checkLeftMid = function(rock) {
+    if (rock.id % 8 !== 1) {
+        var leftMidRock = rocks[rock.id - 2];
+        if (faceIsBomb(leftMidRock)) {
+            rock.raiseMineCount();
+        }
+    }
+};
+var checkRightMid = function(rock) {
+    if (rock.id % 8 !== 0) {
+        var rightMidRock = rocks[rock.id];
+        if (faceIsBomb(rightMidRock)) {
+            rock.raiseMineCount();
+        }
+    }
+};
+var checkLowerLeft = function(rock) {
+    if (rock.id % 8 !== 1 && rock.id + 6 < 56) {
+        var lowerLeftRock = rocks[rock.id + 6];
+        if (faceIsBomb(lowerLeftRock)) {
+            rock.raiseMineCount();
+        }
+    }
+};
+var checkLowerMid = function(rock) {
+    if (rock.id + 9 < 56) {
+        var lowerMidRock = rocks[rock.id + 7];
+        if (faceIsBomb(lowerMidRock)) {
+            rock.raiseMineCount();
+        }
+    }
+};
+var checkLowerRight = function(rock) {
+    if (rock.id % 8 !== 0 && rock.id + 7 < 56) {
+        var lowerRightRock = rocks[rock.id + 8];
+        if (faceIsBomb(lowerRightRock)) {
+            rock.raiseMineCount();
         }
     }
 };
 
-// Function for drawing the timer
-var drawTimer = function () {
-    if (numMatches < tiles.length / 3) {
-        frameRate(60);
-        text("Timer: " + floor(frameCount/60) + " seconds", 215, 35);
-    } else if (numMatches === tiles.length / 3) {
-        frameRate(0);
-        text("Timer: " + floor(frameCount/60) + " seconds", 20, 65);
+// Checks each rock's environment for bombs and sets face to number that surround it
+for (var i = 0; i < rocks.length; i++) {
+    checkUpperLeft(rocks[i]);
+    checkUpperMid(rocks[i]);
+    checkUpperRight(rocks[i]);
+    checkLeftMid(rocks[i]);
+    checkRightMid(rocks[i]);
+    checkLowerLeft(rocks[i]);
+    checkLowerMid(rocks[i]);
+    checkLowerRight(rocks[i]);
+    if (rocks[i].face !== mrPinkImg) {
+        rocks[i].face = possibleFaces[rocks[i].minesAround];
     }
+}
+
+// Declares the number of rocks safely cleared
+var numTries = 0;
+
+// General mouseClicked function that handles scene changes and clicks on rocks
+mouseClicked = function() {
+    if (startButton.isMouseIn() && scene === 0) {
+        scene = 1;
+    } else if (difficultyUp.isMouseIn() && scene === 0) {
+        numBombs += 1;
+    } else if (difficultyDown.isMouseIn() && scene === 0) {
+        numBombs -= 1;
+    } else if (scene === 1) {
+        for (var i = 0; i < rocks.length; i++) {
+            var rock = rocks[i];
+            if (rock.isUnderMouse(mouseX, mouseY)) {
+                rock.isFaceUp = true;
+                if (rock.face === mrPinkImg) {
+                    scene = 2;
+                } else {
+                    numTries += 1;
+                }
+            }
+        }
+        if (NUM_ROWS * NUM_COLS - numTries === numBombs) {
+            scene = 3;
+        }
+    }
+    loop();
 };
+
 
 /***** Setting the scene *****/
 
 // Draws the opening splash screen
 var drawStartScene = function() {
+    noStroke();
     background(255, 255, 255);
     textSize(50);
     fill(0, 0, 0);
     textAlign(CENTER, CENTER);
-    text("Memory Game", 200, 100);
+    text("Minesweeper", 200, 100);
     rectMode(CORNER);
     startButton.draw();
+    difficultyButton.draw();
+    difficultyUp.draw();
+    difficultyDown.draw();
     drawBitmoji(75, 200, 263);
     textSize(15);
     fill(0, 0, 0);
     text("Jonathan Pincince", 200, 380);
 };
 
-// Draws the scene with tiles
+// Draws the scene with rocks
 var drawGameScene = function() {
     textAlign(LEFT, BOTTOM);
     background(255, 255, 255);
     textSize(20);
     fill(0, 0, 0);
-    text("Previous attempts: " + numTries, 15, 35);
-    drawTimer();
+    text("Areas cleared: " + numTries, 15, 35);
     rectMode(CORNER);
-    if (delayStartFC && (frameCount - delayStartFC) > 30) {
-        for (var i = 0; i < tiles.length; i++) {
-            var tile = tiles[i];
-            if (!tile.isMatch) {
-                tile.isFaceUp = false;
-            }
-        }
-        flippedTiles = [];
-        delayStartFC = null;
-        noLoop();
-    }
+    strokeWeight(2);
     
-    for (var i = 0; i < tiles.length; i++) {
-        tiles[i].draw();
+    for (var i = 0; i < rocks.length; i++) {
+        rocks[i].draw();
     }
+};
+
+//Adds splash screen for when mine is hit
+var drawLossScene = function() {
+    fill(255, 0, 0);
+    rect(0, 0, 400, 50);
+    fill(255, 255, 0);
+    text("You've been blown up!", 15, 35);
+    text("Areas cleared: " + numTries, 235, 35);
     
-    if (numMatches === tiles.length/3) {
-        fill(0, 0, 0);
-        textSize(20);
-        text("You found them all in " + numTries + " tries!", 20, 375);
+    for (var i = 0; i < rocks.length; i++) {
+        rocks[i].draw();
+    }
+};
+
+//Adds splash screen for when area is safe
+var drawWinScene = function() {
+    fill(124, 237, 171);
+    rect(0, 0, 400, 50);
+    fill(0, 0, 0);
+    textSize(17);
+    text("You cleared the area without", 15, 27);
+    text("setting off the mines!", 35, 42);
+    text("Areas cleared: " + numTries, 255, 35);
+    
+    for (var i = 0; i < rocks.length; i++) {
+        rocks[i].draw();
     }
 };
 
@@ -337,7 +434,9 @@ draw = function() {
         drawStartScene();
     } else if (scene === 1) {
         drawGameScene();
+    } else if (scene === 2) {
+        drawLossScene();
+    } else if (scene === 3) {
+        drawWinScene();
     }
 };
-
-noLoop();
